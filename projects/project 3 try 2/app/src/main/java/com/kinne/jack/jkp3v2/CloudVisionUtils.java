@@ -1,4 +1,7 @@
+//Jack Daniel Kinne.  Project 3v2.  Mobile Apps CS 480.
 package com.kinne.jack.jkp3v2;
+
+//this package is used to make the cloud connection easier.
 
 /*
  * Copyright 2016, The Android Open Source Project
