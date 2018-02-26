@@ -1,3 +1,7 @@
+//Project 3, Jack Daniel Kinne, CS 480
+// This project is intended as an example of an API call to google's cloud vision
+// currently, the thought is to connect directly.  firebase is the secondary option.
+
 package com.kinne.jack.jkp3;
 
 import android.Manifest;
