@@ -43,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
         try {
             if (requestCode == CAM_REQUEST) {
+                //note: this is just a thumbnail!  modify later for higher quality
                 bitmap = (Bitmap) data.getExtras().get("data");
                 imgTakenPic.setImageBitmap(bitmap);
 

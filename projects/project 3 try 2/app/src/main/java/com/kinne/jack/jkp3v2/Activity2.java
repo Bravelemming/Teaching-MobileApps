@@ -1,41 +1,60 @@
 //Jack Daniel Kinne.  Project 3v2.  Mobile Apps CS 480.
 package com.kinne.jack.jkp3v2;
 
+import android.content.Intent;
 import android.graphics.Bitmap;
-import android.net.Uri;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.TextView;
 
-import com.google.android.things.contrib.driver.button.Button;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ServerValue;
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.vision.v1.Vision;
+import com.google.api.services.vision.v1.VisionRequestInitializer;
+import com.google.api.services.vision.v1.model.AnnotateImageRequest;
+import com.google.api.services.vision.v1.model.BatchAnnotateImagesRequest;
+import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
+import com.google.api.services.vision.v1.model.EntityAnnotation;
+import com.google.api.services.vision.v1.model.Feature;
+import com.google.api.services.vision.v1.model.Image;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import static android.media.MediaScannerConnection.scanFile;
+/*
+  adapted from https://developer.android.com/things/training/doorbell/cloud-vision.html
+  by jwc374 on 2/21/2018.
+  displays the photo in ImageView
+  compresses the bitmap and converts it to byteArray
+  byte array gets passed to google
+  switches between threads
+
+  steps for using Vision api:
+  1) Construct the Vision API instance
+  2) Create the image request
+  3) Add the features we want
+  4) Batch and execute the request
+  5) Convert response into a readable collection of annotations
+*/
 
 public class Activity2 extends AppCompatActivity {
 
-    private static final String TAG = Activity2.class.getSimpleName();
-
-    //link Handler for running Cloud in bkgd, plus thread so it doesn't block the UI
-    private Handler mCloudHandler;
-    private HandlerThread mCloudThread;
-
-    private FirebaseDatabase mDatabase;
-    mDatabase = FirebaseDatabase.getInstance();
+    private static final String TAG = "Activity2.java";
+    private static final String CLOUD_VISION_API_KEY = "AIzaSyD5UXhILEFjEMol189wgnkd4c8MJfp1Hag";
 
     //image we will be messing with
     ImageView savedPic;
@@ -44,17 +63,11 @@ public class Activity2 extends AppCompatActivity {
     //button for saving file
     Button saveButton;
 
-    //begin the thread-en-ing.
-    mCloudThread = new HandlerThread("CloudThread");
-    mCloudThread.start();
-    mCloudHandler = new Handler(mCloudThread.getLooper());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_2);
-
-        Log.d(TAG, "Doorbell Activity created.");
 
         //restoring bitmap image in activity!
         bitmap = getIntent().getParcelableExtra("bitmap");
@@ -62,70 +75,127 @@ public class Activity2 extends AppCompatActivity {
         savedPic.setImageBitmap(bitmap);
 
         //save a file
-        saveButton = (Button) findViewById(R.id.saveButton);
-        saveButton.setOnClickListener(new Activity2.saveAPic());
+        //saveButton = (Button) findViewById(R.id.saveButton);
+        //saveButton.setOnClickListener(new Activity2.saveAPic());
+
+        Intent intent = getIntent();
+        String path = intent.getStringExtra("path");
+        File imageFile = new File(path);
+        Bitmap myBitmap = BitmapFactory.decodeFile(imageFile.getAbsolutePath()); //retrieving file
+
+        Matrix matrix = new Matrix();
+        matrix.postRotate(90);
+        Bitmap rotatedBitmap = Bitmap.createBitmap(myBitmap, 0, 0, myBitmap.getWidth(), myBitmap.getHeight(), matrix, true);
+        //when placing a bitmap in image view from gallery, its rotated on its side :(
+        savedPic.setImageBitmap(rotatedBitmap);
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+
+        myBitmap = Bitmap.createScaledBitmap(myBitmap, 160, 160, true);
+        myBitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        final byte[] byteArray = stream.toByteArray();
 
 
+        //start a new thread
+        new Thread(new Runnable() {
+            public void run() {
+                onPictureTaken(byteArray);
+            }
+        }).start();
     }
 
-    class saveAPic implements  Button.OnClickListener{
-        @Override
-        public void onClick(View view) {
-            //TODO: SAVE A FILE!
-            Bitmap saveMe = savedPic.getDrawingCache();
-            saveImage(saveMe);
-            Toast.makeText(getApplicationContext(), "Picture Saved!", Toast.LENGTH_SHORT).show();
 
+    public static Map<String, Float> annotateImage(byte[] imageBytes) throws IOException {
+        // Construct the Vision API instance
+        HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
+        JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
+        VisionRequestInitializer initializer = new VisionRequestInitializer(CLOUD_VISION_API_KEY);
+        Vision vision = new Vision.Builder(httpTransport, jsonFactory, null).setVisionRequestInitializer(initializer).setApplicationName("vision").build();
+
+        // Create the image request
+        AnnotateImageRequest imageRequest = new AnnotateImageRequest();
+        Image image = new Image();
+        image.encodeContent(imageBytes);
+        imageRequest.setImage(image);
+
+        // Add the features we want
+        Feature labelDetection = new Feature();
+        labelDetection.setType("LABEL_DETECTION");
+        labelDetection.setMaxResults(10);
+        imageRequest.setFeatures(Collections.singletonList(labelDetection));
+
+        // Batch and execute the request
+        BatchAnnotateImagesRequest requestBatch = new BatchAnnotateImagesRequest();
+        requestBatch.setRequests(Collections.singletonList(imageRequest));
+        BatchAnnotateImagesResponse response = vision.images().annotate(requestBatch).setDisableGZipContent(true).execute();
+
+        return convertResponseToMap(response);
+    }
+
+    private static Map<String, Float> convertResponseToMap(BatchAnnotateImagesResponse response) {
+        Map<String, Float> annotations = new HashMap<>();
+
+        // Convert response into a readable collection of annotations
+        List<EntityAnnotation> labels = response.getResponses().get(0).getLabelAnnotations();
+        if (labels != null) {
+            for (EntityAnnotation label : labels) {
+                annotations.put(label.getDescription(), label.getScore());
+            }
         }
+        return annotations;
     }
 
-    private void saveImage(saveMe){
-        //save the image there
-        File newFile = new File(path);
-        try {
-            FileOutputStream fos = new FileOutputStream(newFile);
-            saveMe.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.close();
-            scanFile(context, Uri.fromFile(newFile));
-
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-
-    }
-
-    //imported class from https://github.com/androidthings/doorbell/blob/master/app/src/main/java/com/example/androidthings/doorbell/DoorbellActivity.java
-    private void onPictureTaken(final byte[] imageBytes) {
+    public void onPictureTaken(final byte[] imageBytes) {
         if (imageBytes != null) {
-            final DatabaseReference log = mDatabase.getReference("logs").push();
-            String imageStr = Base64.encodeToString(imageBytes, Base64.NO_WRAP | Base64.URL_SAFE);
-            // upload image to firebase
-            log.child("timestamp").setValue(ServerValue.TIMESTAMP);
-            log.child("image").setValue(imageStr);
+            try {
+                // Process the image using Cloud Vision
+                final Map<String, Float> annotations = annotateImage(imageBytes);
+                Log.d(TAG, "cloud vision annotations:" + annotations);
 
-            mCloudHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(TAG, "sending image to cloud vision");
-                    // annotate image by uploading to Cloud Vision API
-                    try {
-                        Map<String, Float> annotations = CloudVisionUtils.annotateImage(imageBytes);
-                        Log.d(TAG, "cloud vision annotations:" + annotations);
-                        if (annotations != null) {
-                            log.child("annotations").setValue(annotations);
+                //switch back to the main thread to access the textview
+                runOnUiThread(new Runnable(){
+                    public void run() {
+
+                        //find the highest likelihood match
+                        String maxKey = null;
+                        Float maxValue = Float.MIN_VALUE;
+                        for (Map.Entry<String, Float> entry : annotations.entrySet()) {
+                            Float value = entry.getValue();
+                            if (value > maxValue) {
+                                maxKey = entry.getKey();
+                                maxValue = value;
+                            }
                         }
-                    } catch (IOException e) {
-                        Log.e(TAG, "Cloud Vison API error: ", e);
+                        final TextView tv = (TextView) findViewById(R.id.resultTv);
+                        Button yes = findViewById(R.id.yes);
+                        Button no = findViewById(R.id.no);
+
+                        //this will be the top percentage result
+                        tv.setText("Is this a(n) " + maxKey + "?");
+
+                        //this is a correct guess by google
+                        yes.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Intent intent = new Intent(Activity2.this, aResult.class);
+                                startActivity(intent); // starting next activity
+                            }
+                        });
+
+                        //not a correct guess
+                        no.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                Intent intent = new Intent(Activity2.this, falseResult.class);
+                                intent.putExtra("map", (Serializable) annotations);
+                                startActivity(intent); // starting next activity
+                            }
+                        });
                     }
-                }
-            });
-
-
+                });
+            } catch (IOException e) {
+                Log.e(TAG, "Cloud Vision API error: ", e);
+            }
         }
-
     }
-
 }
