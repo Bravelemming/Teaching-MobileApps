@@ -1,34 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-xmlns:app="http://schemas.android.com/apk/res-auto"
-xmlns:tools="http://schemas.android.com/tools"
-android:layout_width="match_parent"
-android:layout_height="match_parent"
-android:fitsSystemWindows="true"
-tools:context="com.kinne.jack.jkp3.MainActivity">
-
-<android.support.design.widget.AppBarLayout
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    >
+    android:layout_height="match_parent"
+    android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
+    tools:context="com.kinne.jack.jkp3.MainActivity">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-         />
+    <Button
+        android:id="@+id/button_camera"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignStart="@+id/imageView"
+        android:layout_marginBottom="38dp"
+        android:text="Open Camera" />
 
-</android.support.design.widget.AppBarLayout>
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="355dip"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/button_gallery"
+        android:layout_centerHorizontal="true" />
 
-<include layout="@layout/content_main" />
+    <Button
+        android:id="@+id/button_gallery"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/button_camera"
+        android:layout_alignBottom="@+id/button_camera"
+        android:layout_alignEnd="@+id/imageView"
+        android:text="Open Gallery" />
 
-<android.support.design.widget.FloatingActionButton
-    android:id="@+id/fab"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="bottom|end"
-    android:layout_margin="16dp"
-    android:src="@android:drawable/ic_menu_gallery" />
+    <Button
+        android:id="@+id/button_detect"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/button_gallery"
+        android:layout_alignBottom="@+id/button_gallery"
+        android:layout_centerHorizontal="true"
+        android:text="detect" />
 
-</android.support.design.widget.CoordinatorLayout>
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/button_detect"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="244dp" />
+
+</RelativeLayout>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/holo_blue_dark"
+    android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
+    tools:context="com.kinne.jack.jkp3v2.ListResults">
+
+    <TextView
+        android:id="@+id/textViewResult"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/header"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/black"
+        android:backgroundTintMode="src_over"
+        android:text="1,2,3,4,5"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="24dp" />
+
+
+    <TextView
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/black"
+        android:text="List of things:"
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="30dp" />
+</RelativeLayout>
