@@ -1,8 +1,24 @@
-# APPLICATION NAME
-Complete description and overview.  This is where you describe in a brief, yet clear and concise, manner what your product should do and how you expect it should be used.  Why did you write this application?  What purpose does it serve?  It's okay if the only purpose is to meet the homework requirement (but try to move bedyond just that - be creative!).
+#Jack Kinne Project 3 - Google Vision
 
-## System Design 
-This is where you specify all of the system's requirements.  This section should accurately portray the complete operation of your application.  Provide scenarios, use cases, system requirements, and diagrams/screenshots of the system.
+This app was made to demonstrate the annotations function in google vision!  Two activities have been made, to showcase this API call.  Picture is taken through the camera function, and API call is sent via thread so the UI is not affected.  Toasts are added on errors or lack of photo selection, Default picture is a sheep.
 
-## Usage
-This is where you explain how to use your application
+I wrote this application twice; which seems to be a theme.  Once I wrote the API call asyncrhonously, which failed (see P3v1).  The second time was with a thread.
+
+#System Design
+FIRST ACTIVITY PAGE:
+the two buttons are:
+1. "Take Picture" take a photo with the camera
+2. "google vision" pass a photo into the API call
+
+SECOND ACTIVITY PAGE: 
+two textviews exist
+1. "List of Things" title header for annotations from google.  
+2. "1, 2, 3, 4, 5" which is a placeholder for the top returns.
+
+#Usage
+In the first activity, we see a default image and two buttons.
+The first button, "take picture" takes a picture with the camera.  You can view the results before you continue.  
+
+The second button, "google vision" takes the picture and uploads it to google's vision API, where annotations are generated on the fly for what it thinks the picture is, plus a percentage.  It transfers this information (and transfers the picture) to the second activity.
+
+In the second activity we see the top ten items with percent for each of the annotation label returns from google vision.

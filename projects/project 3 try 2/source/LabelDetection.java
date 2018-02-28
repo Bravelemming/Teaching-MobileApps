@@ -1,29 +1,29 @@
-package com.kinne.jack.jkp3;
+package com.kinne.jack.jkp3v2;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
+        import android.graphics.Bitmap;
 
-import com.google.api.client.extensions.android.http.AndroidHttp;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.services.vision.v1.Vision;
-import com.google.api.services.vision.v1.VisionRequestInitializer;
-import com.google.api.services.vision.v1.model.AnnotateImageRequest;
-import com.google.api.services.vision.v1.model.BatchAnnotateImagesRequest;
-import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
-import com.google.api.services.vision.v1.model.EntityAnnotation;
-import com.google.api.services.vision.v1.model.Feature;
-import com.google.api.services.vision.v1.model.Image;
+        import com.google.api.client.extensions.android.http.AndroidHttp;
+        import com.google.api.client.http.HttpTransport;
+        import com.google.api.client.json.JsonFactory;
+        import com.google.api.client.json.gson.GsonFactory;
+        import com.google.api.services.vision.v1.Vision;
+        import com.google.api.services.vision.v1.VisionRequestInitializer;
+        import com.google.api.services.vision.v1.model.AnnotateImageRequest;
+        import com.google.api.services.vision.v1.model.BatchAnnotateImagesRequest;
+        import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
+        import com.google.api.services.vision.v1.model.EntityAnnotation;
+        import com.google.api.services.vision.v1.model.Feature;
+        import com.google.api.services.vision.v1.model.Image;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+        import java.io.IOException;
+        import java.util.Collections;
+        import java.util.HashMap;
+        import java.util.List;
+        import java.util.Map;
 
 /**
- with assist from Sam Alston : CS 480
+ with assist from Sam Alston and Jared Conn : CS 480
  This class handles taking the image byte array and sending it off to Google Vision API
  Class was pulled from Google documentation and modified
  */
@@ -68,7 +68,7 @@ public class LabelDetection extends Activity{
         return convertResponseToMap(response);
     }
 
-    //Google method modified by SRA
+    //Google method
     private static Map<String, Float> convertResponseToMap(BatchAnnotateImagesResponse response) {
 
         // Convert response into a readable collection of annotations
