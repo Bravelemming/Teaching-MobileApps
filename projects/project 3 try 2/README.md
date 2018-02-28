@@ -1,3 +1,5 @@
+![The APP](PA3.jpg)
+
 # Project #2: Moar Data
 In this assignment, you must build an application that connects to an external web service.  As always, you are welcome to come up with your own project idea that is equivalent in difficulty, but you must pitch them to me by Monday, February 19.  Otherwise, you should work to complete what I describe below.
 
