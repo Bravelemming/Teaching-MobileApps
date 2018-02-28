@@ -61,7 +61,7 @@ public class Activity2 extends AppCompatActivity {
     Bitmap bitmap;
 
     //button for saving file
-    Button saveButton;
+    //Button saveButton;
 
 
     @Override
