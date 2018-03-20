@@ -1,4 +1,4 @@
-//Jack Daniel Kinne.  Project 3v2.  Mobile Apps CS 480.
+//Jack Daniel Kinne.  Project 4.  Mobile Apps CS 480.
 package com.kinne.jack.jkp3v2;
 
 import android.support.v7.app.AppCompatActivity;
