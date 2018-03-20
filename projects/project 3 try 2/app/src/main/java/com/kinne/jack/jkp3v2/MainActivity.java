@@ -1,10 +1,12 @@
-//Jack Daniel Kinne.  Project 3v2.  Mobile Apps CS 480.
+//Jack Daniel Kinne.  Project 4.  Mobile Apps CS 480.
 //'LabelDetection.java' uses code adapted from Google.
 //API call was adapted from Sam Alston and Jared Conn.
 
 package com.kinne.jack.jkp3v2;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
@@ -13,6 +15,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -30,7 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+    implements ActivityCompat.OnRequestPermissionsResultCallback{
 
     //button for taking pictures
     Button btnpic;
@@ -42,7 +47,8 @@ public class MainActivity extends AppCompatActivity {
 
     //camera
     private static final int CAM_REQUEST=1313;
-    
+    private static final int PERMISSION_REQUEST_CAMERA = 0;
+
     //running a thread
     private Handler mCloudHandler;
     private HandlerThread mCloudThread;
@@ -102,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
         return bitmaps;
     }
 
-    //when camera has taken a picture.  TODO: fix crashing on oneplus.
+    //when camera has taken a picture.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -115,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 Bitmap bmp = (Bitmap) extras.get("data");
                 // set image
                 imgTakenPic.setImageBitmap(bmp);
+                bitmap = bmp;
 
                 //check for failure of camera
                 if (bmp == null){
@@ -123,20 +130,75 @@ public class MainActivity extends AppCompatActivity {
             }
     }
 
-    //take a photo
+    //set up our button to take a photo
     class btnTakePhotoClicker implements  Button.OnClickListener{
 
         @Override
         public void onClick(View view) {
             //I WILL TRY.....
             try {
-                final Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                startActivityForResult(intent, CAM_REQUEST);
+                showCameraPreview();
             }
             //...TO CATCH YOU..
-            catch (Exception e){}
+            catch (Exception e){
+                int foo = 5;
+            }
         }
+    }
+
+    //handle a request for camera permission
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+
+        if (requestCode == PERMISSION_REQUEST_CAMERA) {
+            // Request for camera permission.
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission has been granted. Start camera preview Activity.
+                startCamera();
+            } else {
+                // Permission request was denied.
+                Toast.makeText(getApplicationContext(), "permission for camera was denied.", Toast.LENGTH_LONG).show();
+            }
+        }
+
+    }
+
+    //before we launch the camera, lets make sure we have permission.
+    private void showCameraPreview() {
+        // Check if the Camera permission has been granted
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            // Permission is already available, start camera preview
+            startCamera();
+        }
+        else {
+            // Permission is missing and must be requested.
+            requestCameraPermission();
+        }
+
+    }
+
+    //Permission request
+    private void requestCameraPermission() {
+        // if permission not granted, show error.
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+            Toast.makeText(getApplicationContext(), "permission not granted for camera!", Toast.LENGTH_LONG).show();
+
+        }
+        else {
+            // Request the permission. Result received in onRequestPermissionResult().
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+        }
+    }
+
+    //start the camera!
+    private void startCamera() {
+
+        final Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        startActivityForResult(intent, CAM_REQUEST);
     }
 
 
@@ -198,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
-        //vanish the progressbar!
+        //vanish the progressbar.  Poof!
         progressBar.setVisibility(View.GONE);
 
     }
