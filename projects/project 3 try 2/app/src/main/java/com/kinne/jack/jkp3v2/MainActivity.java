@@ -222,6 +222,7 @@ public class MainActivity extends AppCompatActivity
                             Map<String, Float> annotations = LabelDetection.annotateImage(photoData);
                             Log.d(TAG, "cloud vision annotations:" + annotations);
                             if (annotations != null) {
+                                //breaking here, because we are attempting to print to the ui from a thread!
                                 printMap(annotations);
                             }
                         } catch (IOException e) {
@@ -261,7 +262,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         //vanish the progressbar.  Poof!
-        progressBar.setVisibility(View.GONE);
+        //progressBar.setVisibility(View.GONE);
 
     }
 
