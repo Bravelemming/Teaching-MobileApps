@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity
     ImageView imgTakenPic;
     Bitmap bitmap;
 
-    //camera
+    //camera and permissions
     private static final int CAM_REQUEST=1313;
     private static final int PERMISSION_REQUEST_CAMERA = 0;
 
@@ -84,21 +84,20 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    //convert a drawable resource to a bitmap -- for default
+    //convert a drawable resource to a bitmap -- for default image reasons.
     public static Bitmap drawableToBitmap(Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {
             return ((BitmapDrawable) drawable).getBitmap();
         }
 
-        // We ask for the bounds if they have been set as they would be most
-        // correct, then we check we are  > 0
+        // We ask for the bounds if they have been set
         final int width = !drawable.getBounds().isEmpty() ?
                 drawable.getBounds().width() : drawable.getIntrinsicWidth();
 
         final int height = !drawable.getBounds().isEmpty() ?
                 drawable.getBounds().height() : drawable.getIntrinsicHeight();
 
-        // Now we check we are > 0
+        // Now we check it is > 0
         final Bitmap bitmaps = Bitmap.createBitmap(width <= 0 ? 1 : width, height <= 0 ? 1 : height,
                 Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmaps);
@@ -141,7 +140,7 @@ public class MainActivity extends AppCompatActivity
             }
             //...TO CATCH YOU..
             catch (Exception e){
-                int foo = 5;
+                //add error message maybe.
             }
         }
     }
@@ -242,6 +241,17 @@ public class MainActivity extends AppCompatActivity
 
     //toast results of Google Vision
     public void printMap(Map<String, Float> mp) {
+
+        //running on the UI thread <!!>
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //vanish the progress bar.  Poof!
+                progressBar.setVisibility(View.GONE);
+            }
+        });
+
+        //sort the list, highest to lowest.
         List<Map.Entry<String,Float>> entries = new ArrayList<Map.Entry<String,Float>>(
                 mp.entrySet()
         );
@@ -253,20 +263,35 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
         );
-        for (Map.Entry<String,Float> pair : entries) {
-            // This loop prints entries. You can use the same loop
-            // to get the keys from entries, and add it to your target list.
-            //System.out.println(e.getKey()+":"+e.getValue());
-            Toast.makeText(getApplicationContext(),pair.getKey() + " " + pair.getValue() + "% certain",Toast.LENGTH_SHORT).show();
 
+        //arrays to hold the google api results
+        String labels[] = new String[ entries.size() ];
+        float percentage[] = new float[ entries.size() ];
+
+
+        // print the entries from google.
+        int iterator = 0;
+        for (Map.Entry<String,Float> pair : entries) {
+            //display for testing
+            //Toast.makeText(getApplicationContext(),pair.getKey() + " " + pair.getValue() + "% certain",Toast.LENGTH_SHORT).show();
+
+            //populate the arrays with label and percentage accuracy
+            labels[iterator] = pair.getKey();
+            percentage[iterator] = pair.getValue();
+
+            iterator++;
         }
 
-        //vanish the progressbar.  Poof!
-        //progressBar.setVisibility(View.GONE);
+        //new intent to pass to the ListResults Activity
+        Intent ListResultsIntent = new Intent(getApplicationContext(),ListResults.class);
+        //save and pass the labels, percentage, and picture.
+        ListResultsIntent.putExtra("labels", labels);
+        ListResultsIntent.putExtra("percentage",percentage);
+        ListResultsIntent.putExtra("picture", bitmap);
+
+        startActivity(ListResultsIntent);
 
     }
-
-
 
     //cleanup threads
     @Override

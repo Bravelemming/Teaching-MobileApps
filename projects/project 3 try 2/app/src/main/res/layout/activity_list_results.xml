@@ -32,7 +32,7 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="16dp"
         android:background="@android:color/black"
-        android:text="List of things:"
+        android:text="Google thought this was:"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="30dp" />
