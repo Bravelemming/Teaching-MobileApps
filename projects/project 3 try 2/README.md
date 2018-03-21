@@ -1,6 +1,6 @@
 ![Application flowchart](pa3.jpg)
 
-# Project #4: Moar Data
+# Project #4: The search for less Bugs
 In this assignment, you must build an application that connects to an external web service.  As always, you are welcome to come up with your own project idea that is equivalent in difficulty, but you must pitch them to me by Monday, February 19.  Otherwise, you should work to complete what I describe below.
 
 ## Application Requirements
