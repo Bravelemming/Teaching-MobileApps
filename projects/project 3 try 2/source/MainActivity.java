@@ -1,10 +1,12 @@
-//Jack Daniel Kinne.  Project 3v2.  Mobile Apps CS 480.
+//Jack Daniel Kinne.  Project 4.  Mobile Apps CS 480.
 //'LabelDetection.java' uses code adapted from Google.
 //API call was adapted from Sam Alston and Jared Conn.
 
 package com.kinne.jack.jkp3v2;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
@@ -13,6 +15,8 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -30,7 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+    implements ActivityCompat.OnRequestPermissionsResultCallback{
 
     //button for taking pictures
     Button btnpic;
@@ -40,9 +45,10 @@ public class MainActivity extends AppCompatActivity {
     ImageView imgTakenPic;
     Bitmap bitmap;
 
-    //camera
+    //camera and permissions
     private static final int CAM_REQUEST=1313;
-    
+    private static final int PERMISSION_REQUEST_CAMERA = 0;
+
     //running a thread
     private Handler mCloudHandler;
     private HandlerThread mCloudThread;
@@ -78,21 +84,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    //convert a drawable resource to a bitmap -- for default
+    //convert a drawable resource to a bitmap -- for default image reasons.
     public static Bitmap drawableToBitmap(Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {
             return ((BitmapDrawable) drawable).getBitmap();
         }
 
-        // We ask for the bounds if they have been set as they would be most
-        // correct, then we check we are  > 0
+        // We ask for the bounds if they have been set
         final int width = !drawable.getBounds().isEmpty() ?
                 drawable.getBounds().width() : drawable.getIntrinsicWidth();
 
         final int height = !drawable.getBounds().isEmpty() ?
                 drawable.getBounds().height() : drawable.getIntrinsicHeight();
 
-        // Now we check we are > 0
+        // Now we check it is > 0
         final Bitmap bitmaps = Bitmap.createBitmap(width <= 0 ? 1 : width, height <= 0 ? 1 : height,
                 Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmaps);
@@ -102,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
         return bitmaps;
     }
 
-    //when camera has taken a picture.  TODO: fix crashing on oneplus.
+    //when camera has taken a picture.
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -115,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
                 Bitmap bmp = (Bitmap) extras.get("data");
                 // set image
                 imgTakenPic.setImageBitmap(bmp);
+                bitmap = bmp;
 
                 //check for failure of camera
                 if (bmp == null){
@@ -123,20 +129,75 @@ public class MainActivity extends AppCompatActivity {
             }
     }
 
-    //take a photo
+    //set up our button to take a photo
     class btnTakePhotoClicker implements  Button.OnClickListener{
 
         @Override
         public void onClick(View view) {
             //I WILL TRY.....
             try {
-                final Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-                startActivityForResult(intent, CAM_REQUEST);
+                showCameraPreview();
             }
             //...TO CATCH YOU..
-            catch (Exception e){}
+            catch (Exception e){
+                //add error message maybe.
+            }
         }
+    }
+
+    //handle a request for camera permission
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+
+        if (requestCode == PERMISSION_REQUEST_CAMERA) {
+            // Request for camera permission.
+            if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission has been granted. Start camera preview Activity.
+                startCamera();
+            } else {
+                // Permission request was denied.
+                Toast.makeText(getApplicationContext(), "permission for camera was denied.", Toast.LENGTH_LONG).show();
+            }
+        }
+
+    }
+
+    //before we launch the camera, lets make sure we have permission.
+    private void showCameraPreview() {
+        // Check if the Camera permission has been granted
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                == PackageManager.PERMISSION_GRANTED) {
+            // Permission is already available, start camera preview
+            startCamera();
+        }
+        else {
+            // Permission is missing and must be requested.
+            requestCameraPermission();
+        }
+
+    }
+
+    //Permission request
+    private void requestCameraPermission() {
+        // if permission not granted, show error.
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CAMERA)) {
+            Toast.makeText(getApplicationContext(), "permission not granted for camera!", Toast.LENGTH_LONG).show();
+
+        }
+        else {
+            // Request the permission. Result received in onRequestPermissionResult().
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA}, PERMISSION_REQUEST_CAMERA);
+        }
+    }
+
+    //start the camera!
+    private void startCamera() {
+
+        final Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        startActivityForResult(intent, CAM_REQUEST);
     }
 
 
@@ -160,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
                             Map<String, Float> annotations = LabelDetection.annotateImage(photoData);
                             Log.d(TAG, "cloud vision annotations:" + annotations);
                             if (annotations != null) {
+                                //breaking here, because we are attempting to print to the ui from a thread!
                                 printMap(annotations);
                             }
                         } catch (IOException e) {
@@ -179,6 +241,17 @@ public class MainActivity extends AppCompatActivity {
 
     //toast results of Google Vision
     public void printMap(Map<String, Float> mp) {
+
+        //running on the UI thread <!!>
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                //vanish the progress bar.  Poof!
+                progressBar.setVisibility(View.GONE);
+            }
+        });
+
+        //sort the list, highest to lowest.
         List<Map.Entry<String,Float>> entries = new ArrayList<Map.Entry<String,Float>>(
                 mp.entrySet()
         );
@@ -190,20 +263,35 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
-        for (Map.Entry<String,Float> pair : entries) {
-            // This loop prints entries. You can use the same loop
-            // to get the keys from entries, and add it to your target list.
-            //System.out.println(e.getKey()+":"+e.getValue());
-            Toast.makeText(getApplicationContext(),pair.getKey() + " " + pair.getValue() + "% certain",Toast.LENGTH_SHORT).show();
 
+        //arrays to hold the google api results
+        String labels[] = new String[ entries.size() ];
+        float percentage[] = new float[ entries.size() ];
+
+
+        // print the entries from google.
+        int iterator = 0;
+        for (Map.Entry<String,Float> pair : entries) {
+            //display for testing
+            //Toast.makeText(getApplicationContext(),pair.getKey() + " " + pair.getValue() + "% certain",Toast.LENGTH_SHORT).show();
+
+            //populate the arrays with label and percentage accuracy
+            labels[iterator] = pair.getKey();
+            percentage[iterator] = pair.getValue();
+
+            iterator++;
         }
 
-        //vanish the progressbar!
-        progressBar.setVisibility(View.GONE);
+        //new intent to pass to the ListResults Activity
+        Intent ListResultsIntent = new Intent(getApplicationContext(),ListResults.class);
+        //save and pass the labels, percentage, and picture.
+        ListResultsIntent.putExtra("labels", labels);
+        ListResultsIntent.putExtra("percentage",percentage);
+        ListResultsIntent.putExtra("picture", bitmap);
+        //start new activity in ListResults.java
+        startActivity(ListResultsIntent);
 
     }
-
-
 
     //cleanup threads
     @Override

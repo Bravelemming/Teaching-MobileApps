@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity
         ListResultsIntent.putExtra("labels", labels);
         ListResultsIntent.putExtra("percentage",percentage);
         ListResultsIntent.putExtra("picture", bitmap);
-
+        //start new activity in ListResults.java
         startActivity(ListResultsIntent);
 
     }

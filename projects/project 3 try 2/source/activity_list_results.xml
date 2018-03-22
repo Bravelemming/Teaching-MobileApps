@@ -2,27 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     android:background="@android:color/holo_blue_dark"
     android:theme="@style/Theme.AppCompat.DayNight.NoActionBar"
     tools:context="com.kinne.jack.jkp3v2.ListResults">
-
-    <TextView
-        android:id="@+id/textViewResult"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-
-        android:layout_alignParentEnd="true"
-        android:layout_below="@+id/header"
-        android:layout_marginTop="16dp"
-        android:background="@android:color/black"
-        android:backgroundTintMode="src_over"
-        android:text="1,2,3,4,5"
-        android:textAlignment="center"
-        android:textColor="@android:color/white"
-        android:textSize="24dp" />
-
 
     <TextView
         android:id="@+id/header"
@@ -32,8 +16,81 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="16dp"
         android:background="@android:color/black"
-        android:text="List of things:"
+        android:text="Google thought this was:"
         android:textAlignment="center"
         android:textColor="@android:color/white"
         android:textSize="30dp" />
+
+    <TextView
+        android:id="@+id/textViewResult1"
+        android:layout_width="match_parent"
+
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/header"
+        android:layout_marginTop="29dp"
+        android:layout_toEndOf="@+id/header"
+        android:background="@android:color/black"
+        android:backgroundTintMode="src_over"
+
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="24dp" />
+
+    <TextView
+        android:id="@+id/textViewResult2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textViewResult1"
+        android:layout_marginTop="29dp"
+        android:background="@android:color/black"
+        android:backgroundTintMode="src_over"
+
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="24dp" />
+
+    <TextView
+        android:id="@+id/textViewResult3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/textViewResult2"
+        android:layout_marginTop="28dp"
+        android:background="@android:color/black"
+        android:backgroundTintMode="src_over"
+
+        android:textAlignment="center"
+        android:textColor="@android:color/white"
+        android:textSize="24dp" />
+
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="match_parent"
+
+        android:layout_height="@android:dimen/thumbnail_height"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/textViewResult3"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:background="@android:color/black"
+        android:contentDescription="Default is sheep"
+        android:scaleType="fitCenter"
+        app:srcCompat="@drawable/ra2" />
+
+    <Button
+        android:id="@+id/button_return"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="8dp"
+        android:background="@drawable/rounded_gold"
+        android:backgroundTint="@android:color/holo_blue_dark"
+        android:text="Let's do it again!" />
+
 </RelativeLayout>
