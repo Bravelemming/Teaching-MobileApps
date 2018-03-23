@@ -1,0 +1,17 @@
+# Post Mortem - Jack Daniel Kinne P4
+
+This was a fun assignment, because it was the first time we got to go back to a code base we had already "completed" with new eyes, and the intention to fix and expand the codebase.  Being that familiar with what I was working on gave me a lot of confidence to try some new things in different ways.  
+
+It also made me realize that I was holding onto code, even when the code was obviously wrong or didn't work.  Because I was worried i'd lose the "idea behind" what I was thinking through.  So this was a good project for letting go of things I didn't need; old code, old comments, snippets i'd hunted down on stackoverflow or on googles documentation API websitte.  It also got me writing MUCH better documentation and had me thinking about how to clean what my code looks like for others while I was fixing my UI and expanding my results activity.
+
+I'm happy to report that I overcame two particular struggles in working on this assignment.  The first was the camera, which I discovered I needed to request permission for on runtime in any phone running API 25 or higher.  Or it would crash without a warning.  
+
+I had used a temporary fix I wasn't happy with for PA3, which was to downgrade the API dependency for the app.  It worked, it wasn't great.  This time around, I learned and applied the correct solution to actually request permission from the user, toast a message if they said no, and use a helper function to fire a check to confirm.  
+
+That particular fix took an unreasonable amount of time to deploy, but I had a sense of satisfaction when I was done doing it, because I had future-proofed a potential conflict and made the app more secure in the process.  
+
+And of course, when I fixed the camera I broke my API vision call.  As I discovered during office hours, I wasn't properly running two threads -- one for the UI, and one for the async vision call.  Easy fix that was hard to find: the thread handler I was using did indeed have a runner which I deployed on the runOnUiThread() function it came built with. Interesting thing I learned: it *is* thread safe to run an intent request on the async thread, without needing to run it on the UI thread.  (proof here: https://stackoverflow.com/questions/3295847/is-it-safe-to-launch-and-activity-from-a-non-ui-thread).
+
+If I had to offer advice to a future student on how to succeed in this assignment I would say, pick the meanest, hardest bug you have.  And then just think about it for a while.  Don't code anything.  Talk to some people about the issue.  Draw something on a whiteboard.  Googlefu.  And then Document in comments what you want to have happen in a series of steps.  Once you have it out of your head and written down, *Then* code it.  
+
+This assignment felt a little "loose" in the milestone department, and i'm sure that's the nature of fixing broken things, or expanding what your project should do.  I would say that to improve this assignment in the future we do a simple verbal checkin (or perhaps an online one) where we commit to shooting for certain milestones in our own code, so we are held more accountable for what we want to see on the other side of the PA4 checkin.  Success or failure being not as important as stating a goal, and shooting for it regardless of outcome.
